@@ -1,0 +1,70 @@
+trigger:
+  branches:
+    include:
+    - main
+variables:
+- name: azureSubscription
+  value: '94a52f63-fb40-4989-926a-b84750d87775'
+- name: webAppName
+  value: 'kind-forest-f137b7726e2440ba85296b17abb84ab5'
+- name: environmentName
+  value: 'kind-forest-f137b7726e2440ba85296b17abb84ab5'
+- name: vmImageName
+  value: 'ubuntu-latest'
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '20.x'
+      displayName: 'Install Node.js'
+    - task: CmdLine@2
+      displayName: 'npm install, build and test'
+      inputs:
+        script: |
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+    - task: ecdc45f6-832d-4ad9-b52b-ee49e94659be@0
+      inputs:
+        targetPath: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        artifactName: drop
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn:
+  - Build
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment:
+      name: $(environmentName)
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Azure Web App Deploy: kind-forest-f137b7726e2440ba85296b17abb84ab5'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: webAppLinux
+              appName: $(webAppName)
+              runtimeStack: 'NODE|20LTS'
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+              startUpCommand: 'npm run start'
