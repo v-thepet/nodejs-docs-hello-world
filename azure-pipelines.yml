@@ -65,7 +65,7 @@ stages:
           inputs:
               targetType: 'inline'
               script: |
-                az webapp deploy --name $(webAppName) --src-path $(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+                az webapp deploy --name $(webAppName) --src-path $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
       routeTraffic:
         steps:
         - script: echo routing traffic
