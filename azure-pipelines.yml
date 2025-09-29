@@ -1,8 +1,15 @@
+trigger:
+  branches:
+    include:
+    - main
+
 variables:
 - name: azureSubscription
   value: '94a52f63-fb40-4989-926a-b84750d87775'
 - name: webAppName
   value: 'kind-forest-f137b7726e2440ba85296b17abb84ab5'
+- name: resourceGroup
+  value: 'v-thepet_rg_3874'
 - name: environmentName
   value: 'JSenv'
 
@@ -38,44 +45,48 @@ stages:
       inputs:
         targetPath: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         artifactName: drop
+
 - stage: Deploy
-  displayName: Deploy stage
+  displayName: Rolling deploy to Linux VMs
   dependsOn:
   - Build
   condition: succeeded()
   jobs:
-  - deployment: Deploy
-    displayName: Deploy
+  - deployment: RollingDeploy
+    displayName: Rolling deploy to Linux VMs via az CLI
     environment:
       name: $(environmentName)
       resourceType: VirtualMachine
-    workspace:
-      clean: all
     strategy:
-     rolling:
-      maxParallel: 2  #for percentages, mention as x%
-      preDeploy:
-        steps:
-        - download: current
-          artifact: drop
-        - script: echo initialize, cleanup, backup, install certs
-      deploy:
-        steps:
-        - task: Bash@3
-          inputs:
-              targetType: 'inline'
-              script: |
-                az webapp deploy --name $(webAppName) --src-path $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-      routeTraffic:
-        steps:
-        - script: echo routing traffic
-      postRouteTraffic:
-        steps:
-        - script: echo health check post-route traffic
-      on:
-        failure:
+      rolling:
+        maxParallel: 1 # change to 2 if you want both VMs in parallel
+        preDeploy:
           steps:
-          - script: echo Restore from backup! This is on failure
-        success:
+          - download: current
+            artifact: drop
+          - script: |
+              echo "Pre-deploy step on $(hostname)"
+        deploy:
           steps:
-          - script: echo Notify! This is on success
+          - script: |
+              echo "Deploying zip package to Azure Web App from $(hostname)"
+              az webapp deployment source config-zip \
+                --resource-group $(resourceGroup) \
+                --name $(webAppName) \
+                --src $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+            displayName: 'Deploy ZIP package via az CLI'
+        routeTraffic:
+          steps:
+          - script: |
+              echo "Routing traffic on $(hostname)"
+        postRouteTraffic:
+          steps:
+          - script: |
+              echo "Post-route health check on $(hostname)"
+        on:
+          failure:
+            steps:
+            - script: echo "Deployment failed on $(hostname)"
+          success:
+            steps:
+            - script: echo "Deployment succeeded on $(hostname)"
