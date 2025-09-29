@@ -65,12 +65,11 @@ stages:
         - script: echo initialize, cleanup, backup, install certs
       deploy:
         steps:
-        - task: AzureCLI@2
+        - task: Bash@3
           inputs:
-            azureSubscription: $(azureSubscription)
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: 'az webapp deploy --resource-group v-thepet_rg_3874 --name $(webAppName) --src-path $(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              targetType: 'inline'
+              script: |
+                az webapp deploy --resource-group v-thepet_rg_3874 --name $(webAppName) --src-path $(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
       routeTraffic:
         steps:
         - script: echo routing traffic
