@@ -57,7 +57,7 @@ stages:
       clean: all
     strategy:
      rolling:
-      maxParallel: 2  #for percentages, mention as x%
+      maxParallel: 1  #for percentages, mention as x%
       preDeploy:
         steps:
         - download: current
@@ -66,7 +66,7 @@ stages:
       deploy:
         steps:
           - task: AzureWebApp@1
-            displayName: 'Azure Web App Deploy: kind-forest-f137b7726e2440ba85296b17abb84ab5'
+            displayName: 'Azure Web App Deploy'
             inputs:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
