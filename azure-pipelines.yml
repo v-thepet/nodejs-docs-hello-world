@@ -55,9 +55,15 @@ stages:
     workspace:
       clean: all
     strategy:
-      runOnce:
-        deploy:
-          steps:
+     rolling:
+      maxParallel: 2  #for percentages, mention as x%
+      preDeploy:
+        steps:
+        - download: current
+          artifact: drop
+        - script: echo initialize, cleanup, backup, install certs
+      deploy:
+        steps:
           - task: AzureWebApp@1
             displayName: 'Azure Web App Deploy: kind-forest-f137b7726e2440ba85296b17abb84ab5'
             inputs:
@@ -67,3 +73,16 @@ stages:
               runtimeStack: 'NODE|20LTS'
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
               startUpCommand: 'npm run start'
+      routeTraffic:
+        steps:
+        - script: echo routing traffic
+      postRouteTraffic:
+        steps:
+        - script: echo health check post-route traffic
+      on:
+        failure:
+          steps:
+          - script: echo Restore from backup! This is on failure
+        success:
+          steps:
+          - script: echo Notify! This is on success
