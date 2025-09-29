@@ -17,8 +17,8 @@ stages:
   jobs:
   - job: Build
     displayName: Build
-    pool:
-      vmImage: $(vmImageName)
+    workspace:
+      clean: all
     steps:
     - task: NodeTool@0
       inputs:
