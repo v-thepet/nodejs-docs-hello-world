@@ -57,7 +57,7 @@ stages:
       clean: all
     strategy:
      rolling:
-      maxParallel: 1  #for percentages, mention as x%
+      maxParallel: 2  #for percentages, mention as x%
       preDeploy:
         steps:
         - download: current
