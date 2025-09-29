@@ -39,7 +39,7 @@ stages:
         archiveType: zip
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
-    - task: ecdc45f6-832d-4ad9-b52b-ee49e94659be@0
+    - task: PublishPipelineArtifact@0
       inputs:
         targetPath: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         artifactName: drop
