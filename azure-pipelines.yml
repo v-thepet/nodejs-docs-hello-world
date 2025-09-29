@@ -65,15 +65,12 @@ stages:
         - script: echo initialize, cleanup, backup, install certs
       deploy:
         steps:
-          - task: AzureWebApp@1
-            displayName: 'Azure Web App Deploy'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              appType: webAppLinux
-              appName: $(webAppName)
-              runtimeStack: 'NODE|20LTS'
-              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              startUpCommand: 'npm run start'
+        - task: AzureCLI@2
+          inputs:
+            azureSubscription: $(azureSubscription)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: 'az webapp deploy --resource-group v-thepet_rg_3874 --name $(webAppName) --src-path $(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
       routeTraffic:
         steps:
         - script: echo routing traffic
