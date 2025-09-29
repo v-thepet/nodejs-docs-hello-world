@@ -8,7 +8,7 @@ variables:
 - name: webAppName
   value: 'kind-forest-f137b7726e2440ba85296b17abb84ab5'
 - name: environmentName
-  value: 'kind-forest-f137b7726e2440ba85296b17abb84ab5'
+  value: 'JSenv'
 - name: vmImageName
   value: 'ubuntu-latest'
 stages:
