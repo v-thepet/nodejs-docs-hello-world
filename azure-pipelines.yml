@@ -59,7 +59,7 @@ stages:
       resourceType: VirtualMachine
     strategy:
       rolling:
-        maxParallel: 1 # change to 2 if you want both VMs in parallel
+        maxParallel: 2 # change to 2 if you want both VMs in parallel
         preDeploy:
           steps:
           - download: current
@@ -90,3 +90,4 @@ stages:
           success:
             steps:
             - script: echo "Deployment succeeded on $(hostname)"
+
