@@ -9,8 +9,7 @@ variables:
   value: 'kind-forest-f137b7726e2440ba85296b17abb84ab5'
 - name: environmentName
   value: 'JSenv'
-- name: vmImageName
-  value: 'ubuntu-latest'
+
 stages:
 - stage: Build
   displayName: Build stage
