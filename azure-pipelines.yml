@@ -53,8 +53,8 @@ stages:
     displayName: Deploy
     environment:
       name: $(environmentName)
-    pool:
-      vmImage: $(vmImageName)
+    workspace:
+      clean: all
     strategy:
       runOnce:
         deploy:
