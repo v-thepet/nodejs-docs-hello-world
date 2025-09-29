@@ -52,6 +52,7 @@ stages:
     displayName: Deploy
     environment:
       name: $(environmentName)
+      resourceType: VirtualMachine
     workspace:
       clean: all
     strategy:
